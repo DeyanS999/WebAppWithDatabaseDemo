@@ -1,0 +1,40 @@
+trigger: 'none' # will disable CI builds entirely
+
+pool:
+  vmImage: 'windows-2019'
+  
+variables:
+  BuildConfiguration: release
+  
+steps:
+- task: DotnetCoreCLI@2
+  displayName: Restore Nuget Package
+  inputs:
+    command: restore
+    projects: '**/WebApp.csproj'
+    
+- task: DotnetCoreCLI@2
+  displayName: Build Web App
+  inputs:
+    projects: '**/WebApp.csproj'
+    arguments: '--configuration $(BuildConfiguration)'
+    
+- task: DotnetCoreCLI@2
+  displayName: Run Unit Tests
+  inputs:
+    command: test
+    projects: '**/*UnitTest*.csproj'
+    arguments: '--configuration $(BuildConfiguration)'
+    
+- task: DotnetCoreCLI@2
+  displayName: create Web App Package (.zip)
+  inputs: 
+    command: publish
+    publishWebProjects: True
+    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagindirectory)'
+    zipafterPublish: True
+      
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact (WebApp.zip)'
+  inputs:
+    PathtoPublish: '$(build.artifactstagindirectory)'
