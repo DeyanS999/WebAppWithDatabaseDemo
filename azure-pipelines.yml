@@ -135,4 +135,3 @@ jobs:
     inputs:
       PathtoPublish: AzureResourceGroupDeployment
       ArtifactName: arm
-
